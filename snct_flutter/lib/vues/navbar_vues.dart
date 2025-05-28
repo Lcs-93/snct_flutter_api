@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:snct/vues/accueil_vue.dart';
+import 'package:snct/vues/compte_page.dart';
 
 class NavabarVue extends StatefulWidget {
   const NavabarVue({super.key});
@@ -34,7 +35,15 @@ class _NavabarVueState extends State<NavabarVue> {
       body: <Widget>[
         Card(child: Center(child: ListeTram())),
         Card(child: Center(child: Text('Billet'))),
-        Card(child: Center(child: Text('Compte'))),
+        Card(
+          child: Center(
+            child: ComptePage(
+              onChangePage: (index) {
+                setState(() => currentPageIndex = index);
+              },
+            ),
+          ),
+        ),
       ][currentPageIndex],
     );
   }

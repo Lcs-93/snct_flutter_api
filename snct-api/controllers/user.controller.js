@@ -29,3 +29,18 @@ exports.login = async (req, res) => {
 
   res.json({ message: "Connexion réussie", token, user });
 };
+exports.updateName = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ error: "Nom requis" });
+
+    await User.findByIdAndUpdate(userId, { name });
+    const updatedUser = await User.findById(userId).select("-password");
+
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};
+
