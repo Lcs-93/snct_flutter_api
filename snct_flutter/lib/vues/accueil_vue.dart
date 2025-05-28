@@ -8,45 +8,32 @@ class ListeTram extends StatefulWidget {
 }
 
 class _ListeTramState extends State<ListeTram> {
+  final List<String> leanding = <String>['A', 'B', 'C'];
+  final List<String> title = <String>['Card A', 'Card B', 'Card C'];
+  final List<String> subtitle = <String>['Subtitle A', 'Sub B', 'Sub C'];
+
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        AppBar(title: Text('Accueil')),
-        Card(
-          child: SizedBox(
-            width: 300,
-            height: 100,
-            child: ListTile(
-              leading: Text('P1'),
-              title: Text('Card 1'),
-              subtitle: Text('Description card 1'),
+    return ListView.builder(
+      padding: const EdgeInsets.all(8),
+      itemCount: leanding.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Column(
+          children: [
+            Card(
+              child: SizedBox(
+                width: 300,
+                height: 100,
+                child: ListTile(
+                  leading: Text('${leanding[index]}'),
+                  title: Text('${title[index]}'),
+                  subtitle: Text('${subtitle[index]}'),
+                ),
+              ),
             ),
-          ),
-        ),
-        Card(
-          child: SizedBox(
-            width: 300,
-            height: 100,
-            child: ListTile(
-              leading: Text('P2'),
-              title: Text('Card 2'),
-              subtitle: Text('Description card 2'),
-            ),
-          ),
-        ),
-        Card(
-          child: SizedBox(
-            width: 300,
-            height: 100,
-            child: ListTile(
-              leading: Text('P3'),
-              title: Text('Card 3'),
-              subtitle: Text('Description card 3'),
-            ),
-          ),
-        ),
-      ],
+          ],
+        );
+      },
     );
   }
 }
