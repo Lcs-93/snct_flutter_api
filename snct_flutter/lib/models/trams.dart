@@ -8,7 +8,7 @@ class Trams {
   Trams({this.id, this.name, this.from, this.to, this.status});
 
   Trams.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
+    id = json['_id'];
     name = json['name'];
     from = json['from'];
     to = json['to'];
