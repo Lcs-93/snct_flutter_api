@@ -116,59 +116,63 @@ class _ComptePageState extends State<ComptePage> {
                           user!['email'] ?? "",
                           style: const TextStyle(color: Colors.grey),
                         ),
+                        const SizedBox(height: 8),
+                        const Chip(
+                          label: Text("Voyageur régulier"),
+                          avatar: Icon(Icons.verified, color: Colors.white, size: 18),
+                          backgroundColor: Colors.deepPurple,
+                          labelStyle: TextStyle(color: Colors.white),
+                        )
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 30),
-                  _buildButton(
-                    Icons.receipt,
-                    "Voir mes billets",
-                    () => goToPage(1),
+
+                  // 💳 Méthode de paiement fictive
+                  Card(
+                    margin: const EdgeInsets.symmetric(vertical: 10),
+                    child: ListTile(
+                      leading: Icon(Icons.credit_card, color: Colors.deepPurple),
+                      title: Text("Carte Visa - **** 1234"),
+                      subtitle: Text("Exp. 12/28"),
+                      trailing: TextButton(
+                        onPressed: () {}, // inactif
+                        child: const Text("Modifier"),
+                      ),
+                    ),
                   ),
-                  _buildButton(
-                    Icons.train,
-                    "Réserver un billet",
-                    () => goToPage(0),
-                  ),
+
+                  // Boutons d'action
+                  _buildButton(Icons.receipt, "Voir mes billets", () => goToPage(1)),
+                  _buildButton(Icons.train, "Réserver un billet", () => goToPage(0)),
                   _buildButton(Icons.edit, "Modifier mon nom", editName),
-                  _buildButton(
-                    Icons.logout,
-                    "Se déconnecter",
-                    () => AuthService.logout(context),
-                    color: Colors.red,
-                  ),
-                  _buildButton(
-                    Icons.delete_forever,
-                    "Supprimer mon compte",
-                    deleteAccount,
-                    color: Colors.redAccent,
-                  ),
+                  _buildButton(Icons.logout, "Se déconnecter", () => AuthService.logout(context), color: Colors.red),
+                  _buildButton(Icons.delete_forever, "Supprimer mon compte", deleteAccount, color: Colors.redAccent),
 
                   const SizedBox(height: 30),
                   const Divider(),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Options",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                  const Text("Options", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 10),
+
                   _decorativeItem(Icons.person_outline, "Mes données"),
                   _decorativeItem(Icons.settings, "Paramètres"),
                   _decorativeItem(Icons.language, "Langue"),
                   _decorativeItem(Icons.flag, "Pays"),
                   _decorativeItem(Icons.help_outline, "Aide"),
+                  _decorativeItem(Icons.download, "Télécharger mes données", onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Téléchargement en cours...")),
+                    );
+                  }),
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildButton(
-    IconData icon,
-    String label,
-    VoidCallback onPressed, {
-    Color? color,
-  }) {
+  Widget _buildButton(IconData icon, String label, VoidCallback onPressed, {Color? color}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       child: ElevatedButton.icon(
@@ -187,11 +191,11 @@ class _ComptePageState extends State<ComptePage> {
     );
   }
 
-  Widget _decorativeItem(IconData icon, String label) {
+  Widget _decorativeItem(IconData icon, String label, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.grey[600]),
       title: Text(label),
-      onTap: () {}, // Non cliquable, juste pour le style
+      onTap: onTap,
     );
   }
 }
