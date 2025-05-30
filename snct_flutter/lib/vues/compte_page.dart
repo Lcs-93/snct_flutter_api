@@ -76,7 +76,7 @@ class _ComptePageState extends State<ComptePage> {
     );
 
     if (confirm == true) {
-      await AuthService.logout(context); // Ajoute delete côté backend si besoin
+      await AuthService.deleteAccount(context);
     }
   }
 

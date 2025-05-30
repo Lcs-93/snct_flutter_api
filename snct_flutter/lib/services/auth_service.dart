@@ -99,4 +99,29 @@ class AuthService {
       return false;
     }
   }
+
+  static Future<void> deleteAccount(BuildContext context) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final res = await http.delete(
+      Uri.parse('$baseUrl/users/delete'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (res.statusCode == 200) {
+      showToast("Compte supprimé");
+      await logout(context);
+    } else {
+      showToast("Erreur lors de la suppression");
+    }
+  } catch (e) {
+    showToast("Erreur serveur");
+  }
+}
+
 }

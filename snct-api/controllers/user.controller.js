@@ -43,4 +43,13 @@ exports.updateName = async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 };
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    await User.findByIdAndDelete(userId);
+    res.json({ message: "Compte supprimé avec succès" });
+  } catch (err) {
+    res.status(500).json({ error: "Erreur lors de la suppression" });
+  }
+};
 
