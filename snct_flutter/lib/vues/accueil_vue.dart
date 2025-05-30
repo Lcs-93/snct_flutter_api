@@ -25,7 +25,6 @@ class _ListeTramState extends State<ListeTram> {
   String? idTram;
 
   List<Trams> parseTram(reponseBody) {
-    print(reponseBody);
     var decoded = json.decode(reponseBody);
     var list = decoded as List<dynamic>;
 

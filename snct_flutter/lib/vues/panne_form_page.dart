@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../config.dart'; // pour baseUrl
+import '../config.dart';
 
 class PanneFormPage extends StatefulWidget {
   const PanneFormPage({super.key});
@@ -107,7 +107,10 @@ class _PanneFormPageState extends State<PanneFormPage> {
                   );
                 }).toList(),
                 onChanged: handleTramChange,
-                decoration: const InputDecoration(labelText: 'Tram concerné'),
+                decoration: const InputDecoration(
+                  labelText: 'Tram concerné',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) => value == null ? 'Choisir un tram' : null,
               ),
               const SizedBox(height: 16),
@@ -117,7 +120,10 @@ class _PanneFormPageState extends State<PanneFormPage> {
                     .map((h) => DropdownMenuItem(value: h, child: Text(h)))
                     .toList(),
                 onChanged: (value) => setState(() => horaire = value),
-                decoration: const InputDecoration(labelText: 'Horaire concerné'),
+                decoration: const InputDecoration(
+                  labelText: 'Horaire concerné',
+                  border: OutlineInputBorder(),
+                ),
                 validator: (value) => value == null ? 'Choisir un horaire' : null,
               ),
               const SizedBox(height: 16),
@@ -129,11 +135,17 @@ class _PanneFormPageState extends State<PanneFormPage> {
                   DropdownMenuItem(value: 'autre', child: Text('Autre')),
                 ],
                 onChanged: (value) => setState(() => type = value!),
-                decoration: const InputDecoration(labelText: 'Type de panne'),
+                decoration: const InputDecoration(
+                  labelText: 'Type de panne',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 16),
               TextFormField(
-                decoration: const InputDecoration(labelText: "Commentaire (optionnel)"),
+                decoration: const InputDecoration(
+                  labelText: "Commentaire (optionnel)",
+                  border: OutlineInputBorder(),
+                ),
                 maxLines: 3,
                 onSaved: (value) => commentaire = value?.trim(),
               ),
@@ -144,8 +156,11 @@ class _PanneFormPageState extends State<PanneFormPage> {
                 onPressed: submit,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
+                  foregroundColor: Colors.white,
                   minimumSize: const Size.fromHeight(50),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
               ),
             ],
