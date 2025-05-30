@@ -74,7 +74,7 @@ class _PanneFormPageState extends State<PanneFormPage> {
 
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ Panne signalée avec succès")),
+            const SnackBar(content: Text("Panne signalée avec succès")),
           );
           Navigator.pop(context);
         } else {
@@ -82,7 +82,7 @@ class _PanneFormPageState extends State<PanneFormPage> {
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("❌ Erreur : $e")),
+          SnackBar(content: Text("Erreur : $e")),
         );
       }
     }

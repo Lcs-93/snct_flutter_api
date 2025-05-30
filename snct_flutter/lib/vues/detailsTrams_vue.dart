@@ -47,6 +47,5 @@ class _DetailsTramsState extends State<DetailsTrams> {
         ),
       ],
     );
-    ;
   }
 }

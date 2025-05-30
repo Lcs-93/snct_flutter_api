@@ -38,7 +38,7 @@ class _NavabarVueState extends State<NavabarVue> {
 
   void updatePage(int index) {
     setState(() => currentPageIndex = index);
-    checkLoginStatus(); // re-vérifie si admin
+    checkLoginStatus(); 
   }
 
   @override

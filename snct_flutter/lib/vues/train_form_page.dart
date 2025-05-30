@@ -76,7 +76,7 @@ Future<void> submitTrain() async {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("✅ Train créé avec succès")),
+          const SnackBar(content: Text(" Train créé avec succès")),
         );
         Navigator.pop(context);
       } else {
@@ -84,7 +84,7 @@ Future<void> submitTrain() async {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("❌ Erreur : $e")),
+        SnackBar(content: Text(" Erreur : $e")),
       );
     }
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:snct/vues/detailsTrams_vue.dart';
 import 'package:snct/vues/navbar_vues.dart';
 
