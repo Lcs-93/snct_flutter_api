@@ -1,50 +1,61 @@
 import 'package:flutter/material.dart';
+import 'package:snct/services/auth_service.dart';
 import 'package:snct/vues/accueil_vue.dart';
 import 'package:snct/vues/compte_page.dart';
+import 'package:snct/vues/login_page.dart';
 
 class NavabarVue extends StatefulWidget {
-  const NavabarVue({super.key});
+  final int initialPageIndex;
+
+  const NavabarVue({super.key, this.initialPageIndex = 0});
 
   @override
   State<NavabarVue> createState() => _NavabarVueState();
 }
 
 class _NavabarVueState extends State<NavabarVue> {
-  int currentPageIndex = 0;
+  late int currentPageIndex;
+  bool isLoggedIn = false;
+
+  @override
+  void initState() {
+    super.initState();
+    currentPageIndex = widget.initialPageIndex;
+    checkLoginStatus();
+  }
+
+  Future<void> checkLoginStatus() async {
+    final user = await AuthService.getUser();
+    setState(() {
+      isLoggedIn = user != null;
+    });
+  }
+
+  void updatePage(int index) {
+    setState(() => currentPageIndex = index);
+    checkLoginStatus(); // Re-vérifie si l'utilisateur est connecté
+  }
 
   @override
   Widget build(BuildContext context) {
+    List<Widget> pages = [
+      const ListeTram(),
+      isLoggedIn ? const Text('Billet') : const LoginPage(),
+      isLoggedIn ? ComptePage(onChangePage: updatePage) : const LoginPage(),
+    ];
+
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
-        },
+        onDestinationSelected: updatePage,
         indicatorColor: const Color.fromARGB(255, 141, 205, 255),
         selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(icon: Icon(Icons.home), label: 'Acceuil'),
-          NavigationDestination(
-            icon: Icon(Icons.confirmation_number),
-            label: 'Billets',
-          ),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'Accueil'),
+          NavigationDestination(icon: Icon(Icons.confirmation_number), label: 'Billets'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Compte'),
         ],
       ),
-      body: <Widget>[
-        Card(child: Center(child: ListeTram())),
-        Card(child: Center(child: Text('Billet'))),
-        Card(
-          child: Center(
-            child: ComptePage(
-              onChangePage: (index) {
-                setState(() => currentPageIndex = index);
-              },
-            ),
-          ),
-        ),
-      ][currentPageIndex],
+      body: Card(child: Center(child: pages[currentPageIndex])),
     );
   }
 }

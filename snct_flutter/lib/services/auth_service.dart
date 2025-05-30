@@ -2,10 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import '../vues/login_page.dart';
 import '../utils/toats.dart';
 import 'package:snct/config.dart';
-
+import 'package:snct/vues/navbar_vues.dart';
 class AuthService {
   static const String apiUrl = "http://localhost:5050/api/users";
 
@@ -65,14 +64,21 @@ class AuthService {
     return null;
   }
 
-  static Future<void> logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-    );
-  }
+static Future<void> logout(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove('token');
+  await prefs.remove('user');
+
+  // Redirection vers la page d’accueil (Navbar avec index 0)
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(
+      builder: (_) => const NavabarVue(initialPageIndex: 0),
+    ),
+    (route) => false,
+  );
+}
+
 
   static Future<bool> updateName(String newName, BuildContext context) async {
     try {
