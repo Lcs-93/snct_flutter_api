@@ -7,7 +7,7 @@ import '../utils/toats.dart';
 import 'package:snct/config.dart';
 
 class AuthService {
-  static const String apiUrl = "http://localhost:5000/api/users";
+  static const String apiUrl = "http://localhost:5050/api/users";
 
   static Future<bool> login(
     BuildContext context,
@@ -101,27 +101,26 @@ class AuthService {
   }
 
   static Future<void> deleteAccount(BuildContext context) async {
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
 
-    final res = await http.delete(
-      Uri.parse('$baseUrl/users/delete'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+      final res = await http.delete(
+        Uri.parse('$baseUrl/users/delete'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (res.statusCode == 200) {
-      showToast("Compte supprimé");
-      await logout(context);
-    } else {
-      showToast("Erreur lors de la suppression");
+      if (res.statusCode == 200) {
+        showToast("Compte supprimé");
+        await logout(context);
+      } else {
+        showToast("Erreur lors de la suppression");
+      }
+    } catch (e) {
+      showToast("Erreur serveur");
     }
-  } catch (e) {
-    showToast("Erreur serveur");
   }
-}
-
 }
