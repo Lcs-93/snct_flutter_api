@@ -4,6 +4,15 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:snct/models/trams.dart';
 
+class ArgTrams {
+  final String id;
+  final String name;
+  final String from;
+  final String status;
+
+  ArgTrams(this.id, this.name, this.from, this.status);
+}
+
 class ListeTram extends StatefulWidget {
   const ListeTram({super.key});
 
@@ -13,8 +22,10 @@ class ListeTram extends StatefulWidget {
 
 class _ListeTramState extends State<ListeTram> {
   List<Trams> listTram = [];
+  String? idTram;
 
   List<Trams> parseTram(reponseBody) {
+    print(reponseBody);
     var decoded = json.decode(reponseBody);
     var list = decoded as List<dynamic>;
 
@@ -40,6 +51,11 @@ class _ListeTramState extends State<ListeTram> {
     super.initState();
     loadTrams();
   }
+
+  // static Future<String?> getIdTram() async {
+  //   var idUser = await SharedPreferences.getInstance();
+  //   return idUser.getString('userId');
+  // }
 
   Future<void> loadTrams() async {
     var trams = await fetchTrams();
@@ -69,6 +85,21 @@ class _ListeTramState extends State<ListeTram> {
                         subtitle: Text(tram.status ?? "Pas de statut"),
                       ),
                     ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => {
+                      Navigator.pushNamed(
+                        context,
+                        '/detailsTrams',
+                        arguments: ArgTrams(
+                          tram.id ?? 'Pas id',
+                          tram.name ?? 'Pas name',
+                          tram.from ?? "Pas from",
+                          tram.status ?? "Pas status",
+                        ),
+                      ),
+                    },
+                    child: Text('Séléction'),
                   ),
                 ],
               );
