@@ -8,32 +8,44 @@ import 'package:snct/vues/navbar_vues.dart';
 class AuthService {
   static const String apiUrl = "http://localhost:5050/api/users";
 
-  static Future<bool> login(
-    BuildContext context,
-    String email,
-    String password,
-  ) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$apiUrl/login'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "password": password}),
-      );
+static Future<bool> login(
+  BuildContext context,
+  String email,
+  String password,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$apiUrl/login'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"email": email, "password": password}),
+    );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', data['token']);
-        await prefs.setString('user', jsonEncode(data['user']));
-        return true;
-      } else {
-        return false;
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final prefs = await SharedPreferences.getInstance();
+
+      // Sauvegarde du token
+      await prefs.setString('token', data['token']);
+
+      // Sauvegarde de l'objet user complet
+      final userJson = data['user'];
+      await prefs.setString('user', jsonEncode(userJson));
+
+      // Sauvegarde de l'ID utilisateur séparément
+      if (userJson['_id'] != null) {
+        await prefs.setString('userId', userJson['_id']);
       }
-    } catch (e) {
-      print("Erreur de login: $e");
+
+      return true;
+    } else {
       return false;
     }
+  } catch (e) {
+    print("Erreur de login: $e");
+    return false;
   }
+}
+
 
   static Future<bool> register(
     BuildContext context,
@@ -55,14 +67,20 @@ class AuthService {
     }
   }
 
-  static Future<Map<String, dynamic>?> getUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userString = prefs.getString('user');
-    if (userString != null) {
-      return jsonDecode(userString);
-    }
-    return null;
+static Future<Map<String, dynamic>?> getUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  final userStr = prefs.getString('user');
+  if (userStr != null) {
+    return jsonDecode(userStr);
   }
+  return null;
+}
+
+
+static Future<String?> getUserId() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('userId');
+}
 
 static Future<void> logout(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();

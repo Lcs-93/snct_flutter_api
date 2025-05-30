@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:snct/services/auth_service.dart';
+import 'package:snct/models/user.dart';
 
 class ComptePage extends StatefulWidget {
   final Function(int)? onChangePage;
@@ -11,7 +12,7 @@ class ComptePage extends StatefulWidget {
 }
 
 class _ComptePageState extends State<ComptePage> {
-  Map<String, dynamic>? user;
+  User? user;
 
   @override
   void initState() {
@@ -21,11 +22,13 @@ class _ComptePageState extends State<ComptePage> {
 
   Future<void> loadUser() async {
     final data = await AuthService.getUser();
-    setState(() => user = data);
+    if (data != null) {
+      setState(() => user = User.fromJson(data));
+    }
   }
 
   Future<void> editName() async {
-    final controller = TextEditingController(text: user?['name'] ?? '');
+    final controller = TextEditingController(text: user?.name ?? '');
 
     await showDialog(
       context: context,
@@ -96,24 +99,17 @@ class _ComptePageState extends State<ComptePage> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 50),
               child: ListView(
                 children: [
-                  const Icon(
-                    Icons.account_circle,
-                    size: 90,
-                    color: Colors.deepPurple,
-                  ),
+                  const Icon(Icons.account_circle, size: 90, color: Colors.deepPurple),
                   Center(
                     child: Column(
                       children: [
                         const SizedBox(height: 10),
                         Text(
-                          user!['name'] ?? "",
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          user!.name,
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          user!['email'] ?? "",
+                          user!.email,
                           style: const TextStyle(color: Colors.grey),
                         ),
                         const SizedBox(height: 8),
@@ -126,10 +122,7 @@ class _ComptePageState extends State<ComptePage> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
-                  // 💳 Méthode de paiement fictive
                   Card(
                     margin: const EdgeInsets.symmetric(vertical: 10),
                     child: ListTile(
@@ -137,25 +130,21 @@ class _ComptePageState extends State<ComptePage> {
                       title: Text("Carte Visa - **** 1234"),
                       subtitle: Text("Exp. 12/28"),
                       trailing: TextButton(
-                        onPressed: () {}, // inactif
+                        onPressed: () {},
                         child: const Text("Modifier"),
                       ),
                     ),
                   ),
-
-                  // Boutons d'action
                   _buildButton(Icons.receipt, "Voir mes billets", () => goToPage(1)),
                   _buildButton(Icons.train, "Réserver un billet", () => goToPage(0)),
                   _buildButton(Icons.edit, "Modifier mon nom", editName),
                   _buildButton(Icons.logout, "Se déconnecter", () => AuthService.logout(context), color: Colors.red),
                   _buildButton(Icons.delete_forever, "Supprimer mon compte", deleteAccount, color: Colors.redAccent),
-
                   const SizedBox(height: 30),
                   const Divider(),
                   const SizedBox(height: 10),
                   const Text("Options", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 10),
-
                   _decorativeItem(Icons.person_outline, "Mes données"),
                   _decorativeItem(Icons.settings, "Paramètres"),
                   _decorativeItem(Icons.language, "Langue"),

@@ -31,10 +31,9 @@ class _NavabarVueState extends State<NavabarVue> {
     });
   }
 
-  void updatePage(int index) {
-    setState(() => currentPageIndex = index);
-    checkLoginStatus(); // Re-vérifie si l'utilisateur est connecté
-  }
+void updatePage(int index) {
+  setState(() => currentPageIndex = index);
+}
 
   @override
   Widget build(BuildContext context) {

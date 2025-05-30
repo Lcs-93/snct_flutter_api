@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'register_page.dart';
 import '../services/auth_service.dart';
-import '../dashboard.dart';
+import 'package:snct/vues/navbar_vues.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final String? prefillEmail;
+
+  const LoginPage({super.key, this.prefillEmail});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -15,6 +17,14 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   bool isLoading = false;
   String? errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.prefillEmail != null) {
+      emailController.text = widget.prefillEmail!;
+    }
+  }
 
   Future<void> handleLogin() async {
     setState(() {
@@ -33,7 +43,7 @@ class _LoginPageState extends State<LoginPage> {
     if (success && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const Dashboard()),
+        MaterialPageRoute(builder: (_) => const NavabarVue(initialPageIndex: 0)),
       );
     } else {
       setState(() => errorMessage = "Email ou mot de passe incorrect");

@@ -34,7 +34,9 @@ class _RegisterPageState extends State<RegisterPage> {
     if (success && mounted) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const LoginPage()),
+        MaterialPageRoute(
+          builder: (_) => LoginPage(prefillEmail: emailController.text.trim()),
+        ),
       );
     } else {
       setState(() => errorMessage = "Erreur lors de l'inscription");
