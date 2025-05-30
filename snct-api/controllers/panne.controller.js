@@ -1,10 +1,22 @@
 const Panne = require("../models/panne.model");
-
+const Tram = require("../models/tram.model");
 exports.reportPanne = async (req, res) => {
   try {
     const panne = new Panne(req.body);
     panne.reportedAt = new Date();
     const saved = await panne.save();
+
+    // ✅ Mise à jour du status du tram
+    const tram = await Tram.findById(req.body.tramId);
+    if (tram) {
+      if (req.body.description.toLowerCase().includes('annulation')) {
+        tram.status = 'Down';
+      } else {
+        tram.status = 'Delayed';
+      }
+      await tram.save();
+    }
+
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });

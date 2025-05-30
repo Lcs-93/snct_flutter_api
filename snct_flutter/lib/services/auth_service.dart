@@ -24,16 +24,16 @@ static Future<bool> login(
       final data = jsonDecode(response.body);
       final prefs = await SharedPreferences.getInstance();
 
-      // Sauvegarde du token
       await prefs.setString('token', data['token']);
-
-      // Sauvegarde de l'objet user complet
       final userJson = data['user'];
       await prefs.setString('user', jsonEncode(userJson));
 
-      // Sauvegarde de l'ID utilisateur séparément
       if (userJson['_id'] != null) {
         await prefs.setString('userId', userJson['_id']);
+      }
+
+      if (userJson['role'] != null) {
+        await prefs.setString('role', userJson['role']);
       }
 
       return true;
@@ -46,6 +46,10 @@ static Future<bool> login(
   }
 }
 
+static Future<String?> getUserRole() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('role');
+}
 
   static Future<bool> register(
     BuildContext context,
@@ -86,6 +90,9 @@ static Future<void> logout(BuildContext context) async {
   final prefs = await SharedPreferences.getInstance();
   await prefs.remove('token');
   await prefs.remove('user');
+  await prefs.remove('userId');
+  await prefs.remove('role');
+
 
   // Redirection vers la page d’accueil (Navbar avec index 0)
   Navigator.pushAndRemoveUntil(
