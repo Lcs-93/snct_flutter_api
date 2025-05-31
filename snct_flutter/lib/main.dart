@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snct/services/generate_qr_code.dart';
 import 'package:snct/vues/detailsTrams_vue.dart';
 import 'package:snct/vues/navbar_vues.dart';
 
@@ -13,7 +14,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       initialRoute: '/',
-      routes: {DetailsTrams.routeName: (context) => const DetailsTrams()},
+      routes: {
+        DetailsTrams.routeName: (context) => const DetailsTrams(),
+        '/qrcode': (context) => const GenerateQrCode(),
+      },
       title: 'SNCT App',
       debugShowCheckedModeBanner: false,
       home: const NavabarVue(),

@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:snct/services/auth_service.dart';
 import 'package:snct/vues/accueil_vue.dart';
+import 'package:http/http.dart' as http;
 
 // class DetailsTrams extends StatelessWidget {
 //   const DetailsTrams({super.key});
@@ -23,7 +27,16 @@ class DetailsTrams extends StatefulWidget {
 }
 
 class _DetailsTramsState extends State<DetailsTrams> {
-  GenerateQrCode(id) {}
+  String? idUser;
+
+  Future<void> saveQrCodeUser(String id) async {
+    idUser = await AuthService.getUserId();
+    await http.post(
+      Uri.parse('http://localhost:5050/api/users/save-qrcode'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"idUser": idUser, "idTrams": id}),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +55,7 @@ class _DetailsTramsState extends State<DetailsTrams> {
           ),
         ),
         ElevatedButton(
-          onPressed: () => {GenerateQrCode(args.id)},
+          onPressed: () => {saveQrCodeUser(args.id)},
           child: Text('Acheter billet'),
         ),
       ],

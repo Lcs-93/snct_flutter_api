@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:snct/services/auth_service.dart';
 import 'package:snct/vues/accueil_vue.dart';
 import 'package:snct/vues/login_page.dart';
+import 'package:snct/vues/billet_vue.dart';
 import 'package:snct/vues/compte_page.dart' as compte;
 import 'package:snct/vues/admin_page.dart' as admin;
 
@@ -38,18 +39,18 @@ class _NavabarVueState extends State<NavabarVue> {
 
   void updatePage(int index) {
     setState(() => currentPageIndex = index);
-    checkLoginStatus(); 
+    checkLoginStatus();
   }
 
   @override
   Widget build(BuildContext context) {
     List<Widget> pages = [
       const ListeTram(),
-      isLoggedIn ? const Text('Billet') : const LoginPage(),
+      isLoggedIn ? ListBillet() : const LoginPage(),
       isLoggedIn
           ? (isAdmin
-              ? admin.AdminPage(onChangePage: updatePage)
-              : compte.ComptePage(onChangePage: updatePage))
+                ? admin.AdminPage(onChangePage: updatePage)
+                : compte.ComptePage(onChangePage: updatePage))
           : const LoginPage(),
     ];
 
@@ -60,7 +61,10 @@ class _NavabarVueState extends State<NavabarVue> {
         selectedIndex: currentPageIndex,
         destinations: [
           const NavigationDestination(icon: Icon(Icons.home), label: 'Accueil'),
-          const NavigationDestination(icon: Icon(Icons.confirmation_number), label: 'Billets'),
+          const NavigationDestination(
+            icon: Icon(Icons.confirmation_number),
+            label: 'Billets',
+          ),
           NavigationDestination(
             icon: const Icon(Icons.person),
             label: isAdmin ? 'Admin' : 'Compte',

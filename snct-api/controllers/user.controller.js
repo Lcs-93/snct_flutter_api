@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const billets2users = require("../models/billets2users");
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -52,4 +53,22 @@ exports.deleteAccount = async (req, res) => {
     res.status(500).json({ error: "Erreur lors de la suppression" });
   }
 };
+
+exports.saveQrcode = async (req, res) => {
+  const { idUser, idTrams } = req.body;
+
+  try {
+    const billet = await billets2users.create({ idUser, idTrams });
+    res.status(201).json({ message: 'Billet enregistré', billet });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erreur: err.message });
+  }
+}
+
+exports.getBilletsByUser = async (req, res) => {
+  const {idUser} = req.params;
+  const billets = await billets2users.find({ idUser: idUser });
+  res.json(billets);
+}
 
