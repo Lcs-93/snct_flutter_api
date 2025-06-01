@@ -1,10 +1,7 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:snct/models/billets.dart';
 import 'package:http/http.dart' as http;
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:snct/services/auth_service.dart';
 
 class ListBillet extends StatefulWidget {
@@ -15,69 +12,130 @@ class ListBillet extends StatefulWidget {
 }
 
 class _ListBilletState extends State<ListBillet> {
-  List<Billets> listBillet = [];
+  List<dynamic> billets = [];
   String? idUser;
 
-  List<Billets> parseBillet(reponseBody) {
-    var decoded = jsonDecode(reponseBody);
-    var list = decoded as List<dynamic>;
-
-    var billet = list.map((e) => Billets.fromJson(e)).toList();
-    return billet;
-  }
-
-  Future<List<Billets>> getBillets() async {
+  Future<void> loadBillets() async {
     idUser = await AuthService.getUserId();
-    var reponse = await http.get(
+
+    final response = await http.get(
       Uri.parse('http://localhost:5050/api/users/billets/$idUser'),
-      headers: {'Content-Type': 'application/json'},
     );
 
-    if (reponse.statusCode == 200) {
-      return compute(parseBillet, reponse.body);
+    if (response.statusCode == 200) {
+      setState(() {
+        billets = jsonDecode(response.body);
+      });
     } else {
-      return [];
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Erreur lors du chargement des billets")),
+      );
+    }
+  }
+
+  Future<void> cancelBillet(String idTram) async {
+    idUser = await AuthService.getUserId();
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://localhost:5050/api/users/cancel-billet'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "idUser": idUser,
+          "idTrams": idTram,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Billet annulé avec succès")),
+        );
+        loadBillets();
+      } else {
+        throw Exception("Erreur ${response.body}");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Erreur d'annulation : $e")),
+      );
     }
   }
 
   @override
   void initState() {
     super.initState();
-    loadBillet();
-  }
-
-  Future<void> loadBillet() async {
-    var billet = await getBillets();
-    setState(() {
-      listBillet = billet;
-    });
+    loadBillets();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            itemCount: listBillet.length,
-            itemBuilder: (BuildContext context, int index) {
-              var billet = listBillet[index];
-              return Column(
-                children: [
-                  Text(billet.idTrams ?? 'Pas d id'),
-                  QrImageView(
-                    data: billet.idTrams ?? "Inconnue",
-                    size: 280,
-                    embeddedImageStyle: QrEmbeddedImageStyle(
-                      size: const Size(100, 100),
-                    ),
+    return billets.isEmpty
+        ? const Center(child: Text("Aucun billet réservé"))
+        : ListView.builder(
+            itemCount: billets.length,
+            itemBuilder: (context, index) {
+              final billet = billets[index];
+              final tram = billet['tram'];
+
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14)),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            tram != null
+                                ? "${tram['from']} → ${tram['to']}"
+                                : "Destination inconnue",
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          const Icon(Icons.train, color: Colors.deepPurple),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        tram != null ? tram['name'] ?? "Sans nom" : "Nom inconnu",
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        billet['schedule'] != null
+                            ? billet['schedule']
+                            : "Horaire inconnu",
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: QrImageView(
+                          data: billet['idTrams'],
+                          size: 180,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.cancel, color: Colors.red),
+                          label: const Text(
+                            "Annuler la réservation",
+                            style: TextStyle(color: Colors.red),
+                          ),
+                          onPressed: () => cancelBillet(billet['idTrams']),
+                        ),
+                      )
+                    ],
                   ),
-                ],
+                ),
               );
             },
-          ),
-        ),
-      ],
-    );
+          );
   }
 }

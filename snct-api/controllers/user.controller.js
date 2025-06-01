@@ -2,6 +2,8 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const billets2users = require("../models/billets2users");
+const Tram = require("../models/tram.model");
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -30,6 +32,7 @@ exports.login = async (req, res) => {
 
   res.json({ message: "Connexion réussie", token, user });
 };
+
 exports.updateName = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -44,6 +47,7 @@ exports.updateName = async (req, res) => {
     res.status(500).json({ error: "Erreur serveur" });
   }
 };
+
 exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -55,20 +59,73 @@ exports.deleteAccount = async (req, res) => {
 };
 
 exports.saveQrcode = async (req, res) => {
-  const { idUser, idTrams } = req.body;
+  const { idUser, idTrams, schedule } = req.body;
 
   try {
-    const billet = await billets2users.create({ idUser, idTrams });
+    const tram = await Tram.findById(idTrams);
+
+    if (!tram) return res.status(404).json({ erreur: "Tram introuvable" });
+
+    const billet = await billets2users.create({
+      idUser,
+      idTrams,
+      tramName: tram.name,
+      from: tram.from,
+      to: tram.to,
+      schedule: schedule,
+    });
+
     res.status(201).json({ message: 'Billet enregistré', billet });
   } catch (err) {
     console.error(err);
     res.status(500).json({ erreur: err.message });
   }
-}
+};
 
 exports.getBilletsByUser = async (req, res) => {
-  const {idUser} = req.params;
-  const billets = await billets2users.find({ idUser: idUser });
-  res.json(billets);
-}
+  try {
+    const { id } = req.params;
+    const billets = await billets2users.find({ idUser: id });
 
+    const enrichedBillets = await Promise.all(
+      billets.map(async (billet) => {
+        const tram = await Tram.findById(billet.idTrams);
+        return {
+          idUser: billet.idUser,
+          idTrams: billet.idTrams,
+          schedule: billet.schedule,
+          tram: tram
+            ? {
+                name: tram.name,
+                from: tram.from,
+                to: tram.to,
+                schedule: tram.schedule
+              }
+            : null
+        };
+      })
+    );
+
+    res.json(enrichedBillets);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ erreur: err.message });
+  }
+};
+
+exports.deleteBillet = async (req, res) => {
+  try {
+    const { idUser, idTrams } = req.body;
+
+    const result = await billets2users.findOneAndDelete({ idUser, idTrams });
+
+    if (!result) {
+      return res.status(404).json({ message: "Billet non trouvé" });
+    }
+
+    res.status(200).json({ message: "Billet annulé avec succès" });
+  } catch (err) {
+    console.error("Erreur lors de l'annulation :", err);
+    res.status(500).json({ error: "Erreur serveur" });
+  }
+};

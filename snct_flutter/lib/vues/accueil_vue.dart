@@ -22,26 +22,34 @@ class ListeTram extends StatefulWidget {
 
 class _ListeTramState extends State<ListeTram> {
   List<Trams> listTram = [];
-  String? idTram;
+  List<Map<String, dynamic>> pannes = [];
 
-  List<Trams> parseTram(reponseBody) {
-    var decoded = json.decode(reponseBody);
-    var list = decoded as List<dynamic>;
-
-    var trams = list.map((e) => Trams.fromJson(e)).toList();
-    return trams;
+  List<Trams> parseTram(responseBody) {
+    final decoded = json.decode(responseBody);
+    return (decoded as List).map((e) => Trams.fromJson(e)).toList();
   }
 
   Future<List<Trams>> fetchTrams() async {
-    var reponse = await http.get(
+    final response = await http.get(
       Uri.parse('http://localhost:5050/api/trams'),
       headers: {'Content-Type': 'application/json'},
     );
+    return response.statusCode == 200 ? compute(parseTram, response.body) : [];
+  }
 
-    if (reponse.statusCode == 200) {
-      return compute(parseTram, reponse.body);
-    } else {
-      return [];
+  Future<void> loadTrams() async {
+    final trams = await fetchTrams();
+    setState(() {
+      listTram = trams;
+    });
+  }
+
+  Future<void> loadPannes() async {
+    final response = await http.get(Uri.parse('http://localhost:5050/api/pannes'));
+    if (response.statusCode == 200) {
+      setState(() {
+        pannes = (jsonDecode(response.body) as List).cast<Map<String, dynamic>>();
+      });
     }
   }
 
@@ -49,18 +57,7 @@ class _ListeTramState extends State<ListeTram> {
   void initState() {
     super.initState();
     loadTrams();
-  }
-
-  // static Future<String?> getIdTram() async {
-  //   var idUser = await SharedPreferences.getInstance();
-  //   return idUser.getString('userId');
-  // }
-
-  Future<void> loadTrams() async {
-    var trams = await fetchTrams();
-    setState(() {
-      listTram = trams;
-    });
+    loadPannes();
   }
 
   @override
@@ -70,35 +67,135 @@ class _ListeTramState extends State<ListeTram> {
         Expanded(
           child: ListView.builder(
             itemCount: listTram.length,
-            itemBuilder: (BuildContext context, int index) {
-              var tram = listTram[index];
+            itemBuilder: (context, index) {
+              final tram = listTram[index];
+
+              final panne = pannes.firstWhere(
+                (p) => p['tramId'] == tram.id,
+                orElse: () => {},
+              );
+
+              final isDelayed = tram.status == 'Delayed';
+              final isDown = tram.status == 'Down';
+
+              final badgeText = isDown ? "Annulation" : "Retard";
+              final badgeColor = isDown ? Colors.red : Colors.amber;
+
+              final horaires = (tram.schedule != null && tram.schedule!.isNotEmpty)
+                  ? "${tram.schedule![0]['departureTime']} → ${tram.schedule![0]['arrivalTime']}"
+                  : null;
+
+              final commentaire = panne['description'] != null
+                  ? panne['description'].toString().split('\n').last.trim()
+                  : null;
+
               return Column(
                 children: [
                   Card(
-                    child: SizedBox(
-                      width: 300,
-                      height: 100,
-                      child: ListTile(
-                        leading: Text(tram.from ?? "Pas from"),
-                        title: Text(tram.name ?? "Sans nom"),
-                        subtitle: Text(tram.status ?? "Pas de statut"),
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 4,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${tram.from ?? ''} → ${tram.to ?? ''}",
+                                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    tram.name ?? "Sans nom",
+                                    style: const TextStyle(
+                                        fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              if (isDelayed || isDown)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: badgeColor.shade100,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(color: badgeColor),
+                                  ),
+                                  child: Text(
+                                    badgeText,
+                                    style: TextStyle(
+                                      color: badgeColor.shade800,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          // Horaires
+                          if (horaires != null)
+                            Row(
+                              children: [
+                                const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                                const SizedBox(width: 6),
+                                Text(horaires,
+                                    style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                              ],
+                            ),
+
+                          // Description
+                          if ((isDelayed || isDown) && commentaire != null && commentaire.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Text(
+                                commentaire,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
+
+                  // Bouton sélection
                   ElevatedButton(
-                    onPressed: () => {
-                      Navigator.pushNamed(
-                        context,
-                        '/detailsTrams',
-                        arguments: ArgTrams(
-                          tram.id ?? 'Pas id',
-                          tram.name ?? 'Pas name',
-                          tram.from ?? "Pas from",
-                          tram.status ?? "Pas status",
-                        ),
+                    onPressed: isDown
+                        ? null
+                        : () {
+                            Navigator.pushNamed(
+                              context,
+                              '/detailsTrams',
+                              arguments: ArgTrams(
+                                tram.id ?? 'Pas id',
+                                tram.name ?? 'Pas name',
+                                tram.from ?? 'Pas from',
+                                tram.status ?? 'Pas status',
+                              ),
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple.shade50,
+                      foregroundColor: Colors.deepPurple,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                    },
-                    child: Text('Séléction'),
+                    ),
+                    child: const Text("Sélection"),
                   ),
                 ],
               );

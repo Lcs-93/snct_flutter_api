@@ -1,8 +1,12 @@
 const mongoose = require("mongoose");
 
-const billets2userSchema = new mongoose.Schema({
-  idUser: { type: String, required: true },
-  idTrams: { type: String, required: true, unique: true },
+const billetSchema = new mongoose.Schema({
+  idUser: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'User' },
+  idTrams: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Tram' },
+  tramName: String,
+  from: String,
+  to: String,
+  schedule: String,
 });
 
-module.exports = mongoose.model("Billets2Users", billets2userSchema);
+module.exports = mongoose.model("Billet2User", billetSchema);

@@ -39,6 +39,7 @@ dependencies:
   fluttertoast: ^8.2.12
   flutter_time_picker_spinner: ^2.0.0
   qr_flutter: ^4.1.0
+  flutter_localization: ^0.3.2
 
 dev_dependencies:
   flutter_test:
