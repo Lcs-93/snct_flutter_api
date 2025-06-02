@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:snct/models/trams.dart';
+import 'package:snct/services/auth_service.dart'; // 🔥 Ajouté
 
 class ArgTrams {
   final String id;
@@ -23,6 +24,7 @@ class ListeTram extends StatefulWidget {
 class _ListeTramState extends State<ListeTram> {
   List<Trams> listTram = [];
   List<Map<String, dynamic>> pannes = [];
+  bool isLoggedIn = false;
 
   List<Trams> parseTram(responseBody) {
     final decoded = json.decode(responseBody);
@@ -45,17 +47,28 @@ class _ListeTramState extends State<ListeTram> {
   }
 
   Future<void> loadPannes() async {
-    final response = await http.get(Uri.parse('http://localhost:5050/api/pannes'));
+    final response = await http.get(
+      Uri.parse('http://localhost:5050/api/pannes'),
+    );
     if (response.statusCode == 200) {
       setState(() {
-        pannes = (jsonDecode(response.body) as List).cast<Map<String, dynamic>>();
+        pannes = (jsonDecode(response.body) as List)
+            .cast<Map<String, dynamic>>();
       });
     }
+  }
+
+  Future<void> checkConnexion() async {
+    final userId = await AuthService.getUserId();
+    setState(() {
+      isLoggedIn = userId != null;
+    });
   }
 
   @override
   void initState() {
     super.initState();
+    checkConnexion();
     loadTrams();
     loadPannes();
   }
@@ -81,7 +94,8 @@ class _ListeTramState extends State<ListeTram> {
               final badgeText = isDown ? "Annulation" : "Retard";
               final badgeColor = isDown ? Colors.red : Colors.amber;
 
-              final horaires = (tram.schedule != null && tram.schedule!.isNotEmpty)
+              final horaires =
+                  (tram.schedule != null && tram.schedule!.isNotEmpty)
                   ? "${tram.schedule![0]['departureTime']} → ${tram.schedule![0]['arrivalTime']}"
                   : null;
 
@@ -92,7 +106,10 @@ class _ListeTramState extends State<ListeTram> {
               return Column(
                 children: [
                   Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -110,20 +127,27 @@ class _ListeTramState extends State<ListeTram> {
                                 children: [
                                   Text(
                                     "${tram.from ?? ''} → ${tram.to ?? ''}",
-                                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     tram.name ?? "Sans nom",
                                     style: const TextStyle(
-                                        fontSize: 18, fontWeight: FontWeight.bold),
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
                               if (isDelayed || isDown)
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: badgeColor.shade100,
                                     borderRadius: BorderRadius.circular(20),
@@ -140,22 +164,30 @@ class _ListeTramState extends State<ListeTram> {
                                 ),
                             ],
                           ),
-
                           const SizedBox(height: 12),
 
-                          // Horaires
                           if (horaires != null)
                             Row(
                               children: [
-                                const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                                const Icon(
+                                  Icons.schedule,
+                                  size: 16,
+                                  color: Colors.grey,
+                                ),
                                 const SizedBox(width: 6),
-                                Text(horaires,
-                                    style: const TextStyle(fontSize: 13, color: Colors.black54)),
+                                Text(
+                                  horaires,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.black54,
+                                  ),
+                                ),
                               ],
                             ),
 
-                          // Description
-                          if ((isDelayed || isDown) && commentaire != null && commentaire.isNotEmpty)
+                          if ((isDelayed || isDown) &&
+                              commentaire != null &&
+                              commentaire.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.only(top: 10),
                               child: Text(
@@ -172,9 +204,8 @@ class _ListeTramState extends State<ListeTram> {
                     ),
                   ),
 
-                  // Bouton sélection
                   ElevatedButton(
-                    onPressed: isDown
+                    onPressed: (!isLoggedIn || isDown)
                         ? null
                         : () {
                             Navigator.pushNamed(
@@ -195,7 +226,9 @@ class _ListeTramState extends State<ListeTram> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    child: const Text("Sélection"),
+                    child: Text(
+                      isLoggedIn ? "Sélection" : "Connectez-vous pour réservez",
+                    ),
                   ),
                 ],
               );
