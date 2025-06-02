@@ -51,9 +51,9 @@ class _ListeTramState extends State<ListeTram> {
       Uri.parse('http://localhost:5050/api/pannes'),
     );
     if (response.statusCode == 200) {
+      final data = jsonDecode(response.body) as List;
       setState(() {
-        pannes = (jsonDecode(response.body) as List)
-            .cast<Map<String, dynamic>>();
+        pannes = data.cast<Map<String, dynamic>>();
       });
     }
   }
@@ -111,7 +111,7 @@ class _ListeTramState extends State<ListeTram> {
               final tram = listTram[index];
 
               final panne = pannes.firstWhere(
-                (p) => p['tramId'] == tram.id,
+                (p) => p['tramId']?['_id'] == tram.id,
                 orElse: () => {},
               );
 
@@ -149,25 +149,28 @@ class _ListeTramState extends State<ListeTram> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${tram.from ?? ''} → ${tram.to ?? ''}",
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${tram.from ?? ''} → ${tram.to ?? ''}",
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.grey,
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    tram.name ?? "Sans nom",
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      tram.name ?? "Sans nom",
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                               if (isDelayed || isDown)
                                 Container(
