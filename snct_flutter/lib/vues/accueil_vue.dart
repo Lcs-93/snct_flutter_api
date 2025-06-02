@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import 'package:snct/models/trams.dart';
-import 'package:snct/services/auth_service.dart'; // 🔥 Ajouté
+import 'package:snct/services/auth_service.dart';
 
 class ArgTrams {
   final String id;
@@ -77,6 +77,33 @@ class _ListeTramState extends State<ListeTram> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          child: Row(
+            children: [
+              Icon(Icons.train, color: Colors.deepPurple, size: 26),
+              SizedBox(width: 8),
+              Text(
+                "Horaires des trains",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade50,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Text(
+            "Bienvenue sur la plateforme de réservation SNCTram",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15, color: Colors.deepPurple),
+          ),
+        ),
         Expanded(
           child: ListView.builder(
             itemCount: listTram.length,
@@ -165,7 +192,6 @@ class _ListeTramState extends State<ListeTram> {
                             ],
                           ),
                           const SizedBox(height: 12),
-
                           if (horaires != null)
                             Row(
                               children: [
@@ -184,7 +210,6 @@ class _ListeTramState extends State<ListeTram> {
                                 ),
                               ],
                             ),
-
                           if ((isDelayed || isDown) &&
                               commentaire != null &&
                               commentaire.isNotEmpty)
@@ -203,7 +228,6 @@ class _ListeTramState extends State<ListeTram> {
                       ),
                     ),
                   ),
-
                   ElevatedButton(
                     onPressed: (!isLoggedIn || isDown)
                         ? null
@@ -227,7 +251,7 @@ class _ListeTramState extends State<ListeTram> {
                       ),
                     ),
                     child: Text(
-                      isLoggedIn ? "Sélection" : "Connectez-vous pour réservez",
+                      isLoggedIn ? "Sélection" : "Connectez-vous pour réserver",
                     ),
                   ),
                 ],
