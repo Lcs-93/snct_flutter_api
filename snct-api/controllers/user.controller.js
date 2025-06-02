@@ -93,15 +93,14 @@ exports.getBilletsByUser = async (req, res) => {
         const tram = await Tram.findById(billet.idTrams);
         return {
           idUser: billet.idUser,
+          idTrams: billet.idTrams,
           nameUser: billet.nomUser,
+          schedule: billet.schedule,
           tram: tram
             ? {
-                idTrams: billet.idTrams,
                 name: tram.name,
                 from: tram.from,
-                to: tram.to,
-                departureTime: tram.schedule[0]['departureTime'],
-                arrivalTime: tram.schedule[0]['arrivalTime']
+                to: tram.to
               }
             : null
         };

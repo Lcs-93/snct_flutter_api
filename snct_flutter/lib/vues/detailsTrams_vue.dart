@@ -34,7 +34,7 @@ class _DetailsTramsState extends State<DetailsTrams> {
         Uri.parse('http://localhost:5050/api/users/save-qrcode'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "idUser": idUser,
+          "idUser": infoUser!['_id'],
           "idTrams": idTram,
           "nomUser": infoUser!['name'],
           "schedule": selectedSchedule,

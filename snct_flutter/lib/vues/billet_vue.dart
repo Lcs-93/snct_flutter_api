@@ -25,7 +25,6 @@ class _ListBilletState extends State<ListBillet> {
     if (response.statusCode == 200) {
       setState(() {
         billets = jsonDecode(response.body);
-        print(billets);
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -58,13 +57,6 @@ class _ListBilletState extends State<ListBillet> {
       ).showSnackBar(SnackBar(content: Text("Erreur d'annulation : $e")));
     }
   }
-
-  String jsonData = jsonEncode({
-    "type": "billet_tram",
-    "idUser": "abc123",
-    "idTrams": "tram456",
-    "validUntil": "2025-06-03T23:59:59Z",
-  });
 
   @override
   void initState() {
