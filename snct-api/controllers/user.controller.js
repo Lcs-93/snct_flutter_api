@@ -59,7 +59,7 @@ exports.deleteAccount = async (req, res) => {
 };
 
 exports.saveQrcode = async (req, res) => {
-  const { idUser, idTrams, schedule } = req.body;
+  const { idUser, idTrams, nomUser, schedule } = req.body;
 
   try {
     const tram = await Tram.findById(idTrams);
@@ -69,6 +69,7 @@ exports.saveQrcode = async (req, res) => {
     const billet = await billets2users.create({
       idUser,
       idTrams,
+      nomUser,
       tramName: tram.name,
       from: tram.from,
       to: tram.to,
@@ -92,14 +93,15 @@ exports.getBilletsByUser = async (req, res) => {
         const tram = await Tram.findById(billet.idTrams);
         return {
           idUser: billet.idUser,
-          idTrams: billet.idTrams,
-          schedule: billet.schedule,
+          nameUser: billet.nomUser,
           tram: tram
             ? {
+                idTrams: billet.idTrams,
                 name: tram.name,
                 from: tram.from,
                 to: tram.to,
-                schedule: tram.schedule
+                departureTime: tram.schedule[0]['departureTime'],
+                arrivalTime: tram.schedule[0]['arrivalTime']
               }
             : null
         };
