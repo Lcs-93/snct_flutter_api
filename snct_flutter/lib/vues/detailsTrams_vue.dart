@@ -14,11 +14,13 @@ class DetailsTrams extends StatefulWidget {
 
 class _DetailsTramsState extends State<DetailsTrams> {
   String? idUser;
+  Map<String, dynamic>? infoUser;
   String? selectedSchedule;
   Map<String, dynamic>? tramData;
 
   Future<void> saveQrCodeUser(String idTram) async {
-    idUser = await AuthService.getUserId();
+    // idUser = await AuthService.getUserId();
+    infoUser = await AuthService.getUser();
 
     if (selectedSchedule == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -32,8 +34,9 @@ class _DetailsTramsState extends State<DetailsTrams> {
         Uri.parse('http://localhost:5050/api/users/save-qrcode'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "idUser": idUser,
+          "idUser": infoUser!['_id'],
           "idTrams": idTram,
+          "nomUser": infoUser!['name'],
           "schedule": selectedSchedule,
         }),
       );
@@ -47,15 +50,16 @@ class _DetailsTramsState extends State<DetailsTrams> {
         throw Exception("Erreur : ${response.body}");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur : $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erreur : $e")));
     }
   }
 
   Future<void> fetchTramData(String id) async {
-    final response =
-        await http.get(Uri.parse('http://localhost:5050/api/trams/$id'));
+    final response = await http.get(
+      Uri.parse('http://localhost:5050/api/trams/$id'),
+    );
     if (response.statusCode == 200) {
       setState(() {
         tramData = jsonDecode(response.body);
@@ -87,7 +91,8 @@ class _DetailsTramsState extends State<DetailsTrams> {
                   Card(
                     elevation: 4,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -96,7 +101,9 @@ class _DetailsTramsState extends State<DetailsTrams> {
                           Text(
                             "${tramData!['from']} → ${tramData!['to']}",
                             style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           Text(
@@ -106,8 +113,8 @@ class _DetailsTramsState extends State<DetailsTrams> {
                               color: tramData!['status'] == 'OK'
                                   ? Colors.green
                                   : tramData!['status'] == 'Delayed'
-                                      ? Colors.orange
-                                      : Colors.red,
+                                  ? Colors.orange
+                                  : Colors.red,
                             ),
                           ),
                         ],
@@ -120,12 +127,15 @@ class _DetailsTramsState extends State<DetailsTrams> {
                     DropdownButtonFormField<String>(
                       value: selectedSchedule,
                       items: (tramData!['schedule'] as List)
-                          .map((h) => DropdownMenuItem<String>(
-                                value:
-                                    "${h['departureTime']} → ${h['arrivalTime']}",
-                                child: Text(
-                                    "${h['departureTime']} → ${h['arrivalTime']}"),
-                              ))
+                          .map(
+                            (h) => DropdownMenuItem<String>(
+                              value:
+                                  "${h['departureTime']} → ${h['arrivalTime']}",
+                              child: Text(
+                                "${h['departureTime']} → ${h['arrivalTime']}",
+                              ),
+                            ),
+                          )
                           .toList(),
                       onChanged: (value) =>
                           setState(() => selectedSchedule = value),

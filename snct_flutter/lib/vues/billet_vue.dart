@@ -40,10 +40,7 @@ class _ListBilletState extends State<ListBillet> {
       final response = await http.post(
         Uri.parse('http://localhost:5050/api/users/cancel-billet'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "idUser": idUser,
-          "idTrams": idTram,
-        }),
+        body: jsonEncode({"idUser": idUser, "idTrams": idTram}),
       );
 
       if (response.statusCode == 200) {
@@ -55,9 +52,9 @@ class _ListBilletState extends State<ListBillet> {
         throw Exception("Erreur ${response.body}");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Erreur d'annulation : $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Erreur d'annulation : $e")));
     }
   }
 
@@ -81,7 +78,8 @@ class _ListBilletState extends State<ListBillet> {
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -95,14 +93,18 @@ class _ListBilletState extends State<ListBillet> {
                                 ? "${tram['from']} → ${tram['to']}"
                                 : "Destination inconnue",
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           const Icon(Icons.train, color: Colors.deepPurple),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        tram != null ? tram['name'] ?? "Sans nom" : "Nom inconnu",
+                        tram != null
+                            ? tram['name'] ?? "Sans nom"
+                            : "Nom inconnu",
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 8),
@@ -114,10 +116,7 @@ class _ListBilletState extends State<ListBillet> {
                       ),
                       const SizedBox(height: 16),
                       Center(
-                        child: QrImageView(
-                          data: billet['idTrams'],
-                          size: 180,
-                        ),
+                        child: QrImageView(data: jsonEncode(billet), size: 180),
                       ),
                       const SizedBox(height: 16),
                       Align(
@@ -130,7 +129,7 @@ class _ListBilletState extends State<ListBillet> {
                           ),
                           onPressed: () => cancelBillet(billet['idTrams']),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
